@@ -1,5 +1,5 @@
 # RequetDataSet
-The following data set is generated based on the statistical properties of the real power grid. Detailed description of the generation procedure and an evaluation of the generated network is provided in:
+The following data set is generated based on collected data in :
 
 Craig Gutterman, Katherine Guo, Sarthak Arora, Xiaoyang Wang, Les Wu, Ethan Katz-Bassett, Gil Zussman, “Requet: Real-Time QoE Detection for Encrypted YouTube Traffic,” in Proc. ACM MMSys’19 (to appear), 2019.
 
@@ -14,13 +14,22 @@ In each 'merged.txt' file, data is recorded approximately every 100 ms. Each int
 The Playback Info is represented as: [Playback Event, Epoch Time, Start Time, Playback Progress, Video Length, Playback Quality, Buffer Health, Buffer Progress, Buffer Valid]. Each one of these fields is represented as follows:
 
 Playback Event - The YouTube IFrame API environment allows  to record any event as it occurs and to keep detailed information about playback progress. Accordingly, the Playback Event field is a binary array with indexes for the following states: Buffering, Pause, Play, and Collect Data.  The 0th index represents  the Buffering event indicating the player has switched to the stall state and the video is buffering. The 1st index represents a Pause event by the user. The 2nd index represents Play event of the video starting or switching from buffering or stall state. The 3rd index represents a Collect Data event in which data is collected without change in YouTube player state. For example, an interval with a Playback Event such as [1,0,0,1] indicates that the video switched to the Buffering State and a Collect Data event in the same interval.
+
 Epoch Time - The Epoch time of the current sample from YouTube IFrame API (in milliseconds). 
+
 Start Time - The Epoch time of the beginning of the experiment (in milliseconds). 
+
 Playback Progress - The number of seconds the playback is from the start of the video. 
+
 The Video Length - The length of the video (in seconds). 
+
 Playback Quality - Is a binary array with indexes for the following states: unlabeled, tiny, small, medium, large, hd720, hd1080, hd1440, hd2160. Playback Quality is represented with a list of size 9, respectively. The unlabeled state can occur when the video is starting up, video is buffering, or paused. For example, an interval with a Playback Quality such as [0, 1, 1, 0, 0, 0, 0, 0, 0] indicates that there were tiny and small states recorded in the same interval.
+
 Buffer Health - The buffer health is calculated as: 
+
 Buffer Health = Buffer Progress * Video Length - Playback Progress
+
 Buffer progress - The fraction of video loaded. 
+
 Buffer valid - Is either True or $-1$. True represents when data is being collected from the YouTube IFrame API. $-1$ is given when data is not being collected from the YouTube IFrame API. 
 
