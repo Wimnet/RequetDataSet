@@ -7,29 +7,37 @@ We would appreciate it if you cite this paper when publishing results that use t
 
 Please contact Craig Gutterman (clg2168@columbia.edu) with any questions.
 
-The dataset has 5 folders for the data from groups A, B1, B2, C, D. In addition, it contains a file 'EpxerimentInfo.txt'. Each line in the file contains an experiment number, video ID, initial video resolution, and length of experiment in seconds. For a given group, there are two subfolders  with the  following files for each experiment in the group:  (i) PCAP files and (ii)  files with  data collected from the YouTube API as well as summarized data from the PCAP traces. The former file name is structured as $baseline_{date}_exp_{num}.pcap' for static experiments where the end device is in a fixed location for the entire experiment and 'movement_{date}_exp_\{num}.pcap' for experiments where the end device is moved during the experiment. The latter associated file names end with '_merged.txt' instead of '.pcap'. The rest of the document describes experiment data that end with 'merged.txt'. 
+The dataset is divided into 5 group folders for data from groups A, B1, B2, C, D, along with a summary file named 'ExperimentInfo.txt' for the entire dataset. Each line in the file describes an experiment using the following four attributes: (a) experiment number, (b) video ID, (c) initial video resolution, and (d) length of experiment in seconds. 
 
-In each $'merged.txt'$ file, data is recorded approximately every $100$ ms. Each interval is represented as: [Relative Time, # Packets Sent, # Packets Received, # Bytes Sent, # Bytes Received, [Network Info 1], [Network Info 2], [Network Info 3], [Network Info 4], [Network Info 5], ... , [Network Info 10], [Playback Info] ]. The Relative Time is the time of the first packet recorded from the PCAP file for the experiment. The Relative Time starts from 0 and data is summarized every $100$ ms. The Network Info is represented as: [IP Src, IP Dst, Protocol, \# Packets Sent, # Packets Received, # Bytes Sent, # Bytes Received] for the 100 ms interval. The IP Src is the IP address of the client device. The top 10 destination IP addresses for the entire session are chosen. The top is determined by the total amount of packets. For each of these there is Network Info for the interval.  The associated protocol for a pair in an interval is determined by the most common protocol associated to the IP pair. 
+A group folder is further divided into two subfolders, one for PCAP files, and the other for txt files. Each experiment is described by a PCAP file and a txt file. The PCAP file with name in the form of (i) 'baseline_{date}_exp_{num}.pcap'$ is for an experiment where the end device is static for the entire duration whereas a file with name in the form of (ii) 'movement_{date}_exp_{num}.pcap' is for an experiment where the end device movement occurs during the experiment. The txt file names end with 'merged.txt'. The txt file contains data colletect from YouTube API and summary of PCAP trace for the experiment.
 
-The Playback Info is represented as: [Playback Event, Epoch Time, Start Time, Playback Progress, Video Length, Playback Quality, Buffer Health, Buffer Progress, Buffer Valid]. Each one of these fields is represented as follows:
+In each $'merged.txt'$ file, data is recorded for each 100$ ms interval. Each interval is represented as: [Relative Time, # Packets Sent, # Packets Received, # Bytes Sent, # Bytes Received, [Network Info 1], [Network Info 2], [Network Info 3], [Network Info 4], [Network Info 5], ... , [Network Info 25], [Playback Info] ]. 
 
-Playback Event - The YouTube IFrame API environment allows to record any event as it occurs and to keep detailed information about playback progress. The YouTube IFrame API gives changes to 3 states: ''Buffering', 'Pause', and 'Play'.  We additionally collect data every 100 ms to record updates to buffer level and video quality. Accordingly, the Playback Event field is a binary array with indexes for the following states: 'Buffering', 'Pause', 'Play', and 'Collect Data'. The 0th index represents  the Buffering event indicating the player has switched to the stall state and the video is buffering. The 1st index represents a Pause event by the user. The 2nd index represents Play event of the video starting or switching from buffering state. The 3rd index represents a Collect Data event in which data is collected without change in YouTube player state. This event occurs every $100$ ms without changing in 'Buffering', 'Pause', or 'Play'.  For example, an interval with a Playback Event such as [1,0,0,1] indicates that the video switched to the Buffering State and a Collect Data event in the same interval.
+Relative Time is defined as the time since the Javascript Node server hosting the YouTube API begins. Relative Time for the 0th interval is defined as 0 sec. It is updated in intervals of 100 ms. 
 
-Epoch Time - The Epoch time of the current sample from YouTube IFrame API (in milliseconds). 
+The Network Info i is represented as: [IP Src, IP Dst, Protocol, # Packets Sent, # Packets Received, # Bytes Sent, # Bytes Received] for each interval. IP_Src is the IP address of the end device. The top 25 destination IP addresses in terms of total bytes sent and received for the entire session are recorded. For each $i$ of the top 25 IP_Dst addresses, the Protocol associated with the higher data volume for the interval (in terms of total number of packets exchanged) is selected, and data volume in terms of packets and bytes for each interval is reported for the {IP_Src, IP_Dst, Protocol} tuple in [Network Info i].
 
-Start Time - The Epoch time of the beginning of the experiment (in milliseconds). 
+The Playback Info is represented as: [Playback Event, Epoch Time, Start Time, Playback Progress, Video Length, Playback Quality, Buffer Health, Buffer Progress, Buffer Valid]. From the perspective of video playback, a YouTube session can contain three exclusive regions: buffering, playing, and paused. YouTube IFrame API considers a transition from one playback region into another as an event. It also considers as an event any call to the API to collect data. The API enables the recording of an event and of detailed information about playback progress at the time the event occurs. Epoch Time marks the epoch time of the most recent YouTube API data collected in that interval. Playback Info records events occurred during the 100-ms interval.
 
-Playback Progress - The number of seconds the playback is from the start of the video. 
+Each field of Playback Info is defined as follows:
 
-The Video Length - The length of the video (in seconds). 
+Playback Event - This field is a binary array with four indexes for the following states: 'buffering', 'paused', 'playing', and 'collect data'.  The 'collect data' event occurs every $100$ ms once the video starts playing. For example, an interval with a Playback Event [1,0,0,1] indicates that playback region has transitioned into 'buffering' during the 100-ms interval and a 'collect data' event occurred.
 
-Playback Quality - Is a binary array with indexes for the following states: unlabeled, tiny, small, medium, large, hd720, hd1080, hd1440, hd2160. Playback Quality is represented with a list of size 9, respectively. The unlabeled state can occur when the video is starting up, video is buffering, or paused. For example, an interval with a Playback Quality such as [0, 1, 1, 0, 0, 0, 0, 0, 0] indicates that there were tiny and small states recorded in the same interval.
+Epoch Time - This field is the UNIX epoch time in milliseconds of the most recent YouTube API event in the 100-ms interval. 
 
-Buffer Health - The buffer health is defined the amount of buffer ahead of buffer playback (in seconds). The buffer health is calculated as: 
+Start Time - This field is the epoch time of the beginning of the experiment (in milliseconds).  
+
+Playback Progress - This field reports the number of seconds the playback is at epoch time from the start of the video playback. 
+
+The Video Length - This field reports the length of the entire video asset (in seconds).  
+
+Playback Quality - This field is a binary array of size 9 with indices for the following states: unlabelled, tiny (144p), small (240p), medium (360p), large (480p), hd720, hd1080, hd1440, and hd2160. The unlabeled state occurs when the video is starting up, buffering, or paused. For example, a Playback Quality [0, 1, 1, 0, 0, 0, 0, 0, 0] indicates that during the current interval, video playback experienced two quality levels - tiny and small.
+
+Buffer Health - This field is defined the amount of buffer in seconds ahead of current video playback. It is calculated as: 
 
 Buffer Health = Buffer Progress * Video Length - Playback Progress
 
-Buffer progress - The fraction of video loaded in the buffer. 
+Buffer progress - This field reports the fraction of video asset that has been downloaded into the buffer. 
 
-Buffer valid - Is either True or $-1$. True represents when data is being collected from the YouTube IFrame API. $-1$ is given when data is not being collected from the YouTube IFrame API. 
+Buffer valid - This field has two possible values: True or $-1$. True represents when data is being collected from the YouTube IFrame API. $-1$ indicates when data is not being collected from the YouTube IFrame API during the current interval. 
 
