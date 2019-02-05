@@ -13,7 +13,7 @@ A group folder is further divided into two subfolders, one for PCAP files, and t
 
 In each $'merged.txt'$ file, data is recorded for each 100$ ms interval. Each interval is represented as: [Relative Time, # Packets Sent, # Packets Received, # Bytes Sent, # Bytes Received, [Network Info 1], [Network Info 2], [Network Info 3], [Network Info 4], [Network Info 5], ... , [Network Info 25], [Playback Info] ]. 
 
-Relative Time is defined as the time since the Javascript Node server hosting the YouTube API begins. Relative Time for the 0th interval is defined as 0 sec. It is updated in intervals of 100 ms. 
+Relative Time marks the end of the interval. Relative Time is defined as the time since the JAvascript Node server hosting the YouTube API is started. Relative Time for the 0th interval is defined as 0 sec. It is updated in intervals of 100 ms. TShark is called prior the Javascript Node server. Therefore, the 0th interval contains Wireshark data up to the start of the Javascript Node server.
 
 The Network Info i is represented as: [IP Src, IP Dst, Protocol, # Packets Sent, # Packets Received, # Bytes Sent, # Bytes Received] for each interval. IP_Src is the IP address of the end device. The top 25 destination IP addresses in terms of total bytes sent and received for the entire session are recorded. For each $i$ of the top 25 IP_Dst addresses, the Protocol associated with the higher data volume for the interval (in terms of total number of packets exchanged) is selected, and data volume in terms of packets and bytes for each interval is reported for the {IP_Src, IP_Dst, Protocol} tuple in [Network Info i].
 
@@ -25,7 +25,7 @@ Playback Event - This field is a binary array with four indexes for the followin
 
 Epoch Time - This field is the UNIX epoch time in milliseconds of the most recent YouTube API event in the 100-ms interval. 
 
-Start Time - This field is the epoch time of the beginning of the experiment (in milliseconds).  
+Start Time - This field is the Unix epoch time in milliseconds of the beginning of the experiment.
 
 Playback Progress - This field reports the number of seconds the playback is at epoch time from the start of the video playback. 
 
@@ -39,5 +39,5 @@ Buffer Health = Buffer Progress * Video Length - Playback Progress
 
 Buffer progress - This field reports the fraction of video asset that has been downloaded into the buffer. 
 
-Buffer valid - This field has two possible values: True or $-1$. True represents when data is being collected from the YouTube IFrame API. $-1$ indicates when data is not being collected from the YouTube IFrame API during the current interval. 
+Buffer valid - This field has two possible values: True or -1. True represents when data is being collected from the YouTube IFrame API. -1 indicates when data is not being collected from the YouTube IFrame API during the current interval. 
 
